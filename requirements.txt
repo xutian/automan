@@ -1,0 +1,5 @@
+lxml >= 3.36
+libsaas >= 0.4
+urllib3 >= 1.10.4
+simplejson >= 3.53
+python-bugzilla >= 1.22
