@@ -87,7 +87,7 @@ def requried_fixs(bug):
     :param bug: bugzilla bug object.
     """
     out = []
-    reg = re.compile(r"(http.*\d+/?$)", re.M | re.I)
+    reg = re.compile(r"(http.*/[a-z]+/\d+/?$)", re.M | re.I)
     for comment in bug.getcomments():
         text = comment.get("text")
         out += reg.findall(text)
@@ -101,10 +101,12 @@ def dispatch_ghlink(link):
     :param link: url of github pull-request
     :return set: github user, name and issue ID
     """
-    partten = r"http.*/(.*)?/(.*)?/pull/(\d+)?"
+    partten = r"http.*/(.*)/(.*)/pull/(\d+)"
     regex = re.compile(partten, re.M | re.I)
     match = regex.search(link)
-    return match.groups()
+    if match:
+        return match.groups()
+    return None
 
 
 def add_gh_link(bug, pullreq):
@@ -157,8 +159,12 @@ def is_phlink(link):
 
 def link2pullreq(link, gh):
     info = dispatch_ghlink(link)
-    repo = gh.repo(info[0], info[1])
-    return repo.pullrequest(info[2])
+    try:
+        repo = gh.repo(info[0], info[1])
+        return repo.pullrequest(info[2])
+    except Exception:
+        print "ERROR - Invaild pullreq link '%s'" % link
+    return None
 
 
 def is_merged(pullreq):
@@ -186,6 +192,7 @@ def is_ready4qa(bug, gh):
     ghlinks = filter(is_ghlink, links)
     phlinks = filter(is_phlink, links)
     pullreqs = map(lambda link: link2pullreq(link, gh), ghlinks)
+    pullreqs = filter(None, pullreqs)
     notappliedphs = filter(lambda x: not is_applied(x), phlinks)
     notmergedghs = filter(lambda x: not is_merged(x), pullreqs)
     for pullreq in notmergedghs:
