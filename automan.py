@@ -173,7 +173,7 @@ def is_merged(pullreq):
 
 def is_applied(link):
     state = get_phstate(link)
-    return state != "Accepted"
+    return state == "Accepted"
 
 
 def is_ready4qa(bug, gh):
