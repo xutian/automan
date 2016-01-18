@@ -189,6 +189,11 @@ def is_ready4qa(bug, gh):
     if not links:
         return False
 
+    # No need to set comments and bug status for bug in
+    # below status.
+    if bug.status in ["VERIFIED", "CLOSED", "ON_QA"]:
+        return False
+
     ghlinks = filter(is_ghlink, links)
     phlinks = filter(is_phlink, links)
     pullreqs = map(lambda link: link2pullreq(link, gh), ghlinks)
