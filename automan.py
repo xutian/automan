@@ -11,18 +11,10 @@ from ConfigParser import SafeConfigParser
 
 
 def apilink2htmlink(apiurl):
-    user_agent = ("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) "
-                  "Gecko/20100101 Firefox/44.0")
-    headers = {"User-Agent": user_agent}
-    try:
-        request = urllib2.Request(url=apiurl, headers=headers)
-        html = urllib2.urlopen(request).read()
-        info = json.loads(html)
-        return str(info["html_url"])
-    except Exception as details:
-        print "Error: %s" % details
-    return None
-
+    """
+    Translate github API link to html link
+    """
+    return apiurl.replace("api.", "").replace("repos/", "")
 
 def send_request(resource, conditions=None):
     out = []
@@ -270,7 +262,7 @@ def get_bugsfromfix(parse, bzla, gh):
     out = []
     for ghuser in parse.get("github", "users").split():
         for ghname in cfgparse.get(ghuser, "repos").split():
-            print "INFO - go through reop %s/%s" % (ghuser, ghname)
+            print "INFO - Go through reop %s/%s" % (ghuser, ghname)
             bugs = get_ghlink2bugs(bzla, gh, ghuser, ghname)
             out.extend(bugs)
     return out
