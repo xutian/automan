@@ -11,9 +11,12 @@ from ConfigParser import SafeConfigParser
 
 
 def apilink2htmlink(apiurl):
+    user_agent = ("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) "
+                  "Gecko/20100101 Firefox/44.0")
+    headers = {"User-Agent": user_agent}
     try:
-        request = urllib2.urlopen(apiurl)
-        html = request.read()
+        request = urllib2.Request(url=apiurl, headers=headers)
+        html = urllib2.urlopen(request).read()
         info = json.loads(html)
         return str(info["html_url"])
     except Exception as details:
