@@ -291,6 +291,9 @@ if __name__ == "__main__":
     parser.add_argument('--config-file', action='store',
                         dest='cfg_file', default=ini_cfg,
                         help="include github and bugzilla configuration")
+    parser.add_argument('--product', action='store', dest='product',
+                        help="Bugzilla product, default('Kvm_Autotest')",
+                        default='Kvm_Autotest')
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     arguments = parser.parse_args()
 
@@ -312,5 +315,6 @@ if __name__ == "__main__":
     bugs = get_bugsfromfix(cfgparse, bzla, gh)
     if arguments.bug_list:
         bugs += get_bugsfromlist(arguments.bug_list, bzla)
-    bugs = [bug for bug in bugs if is_ready4qa(bug, gh)]
+    bugs = filter(lambda b: is_ready4qa(b, gh), bugs)
+    bugs = filter(lambda b: b.get('product') == arguments.product, bugs)
     map(move_state2onqa, bugs)
