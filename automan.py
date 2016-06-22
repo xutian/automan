@@ -9,6 +9,7 @@ from bugzilla import Bugzilla
 from libsaas.services import github
 from ConfigParser import SafeConfigParser
 
+MAX_SEARCH_DEPTH = 0
 
 def apilink2htmlink(apiurl):
     """
@@ -16,12 +17,14 @@ def apilink2htmlink(apiurl):
     """
     return apiurl.replace("api.", "").replace("repos/", "")
 
-def send_request(resource, conditions=None):
+def send_request(resource, depth=0, conditions=None):
     out = []
     kwargs = {"page": 1, "per_page": 50}
     if conditions:
         kwargs.update(conditions)
     while True:
+        if depth and kwargs['page'] > depth:
+            break
         objs = resource.get(**kwargs)
         out += objs
         kwargs["page"] += 1
@@ -38,7 +41,9 @@ def get_issues(repo, state='all'):
     # FixMe:
     #    how to list all pullrequest?
     kwargs = {"state": state}
-    return send_request(request, kwargs)
+    global MAX_SEARCH_DEPTH
+    depth = MAX_SEARCH_DEPTH
+    return send_request(request, depth, kwargs)
 
 
 def get_merged(repo):
@@ -293,6 +298,9 @@ if __name__ == "__main__":
     parser.add_argument('--product', action='store', dest='product',
                         help="Bugzilla product, default('Kvm_Autotest')",
                         default='Kvm_Autotest')
+    parser.add_argument('--max-depth', action='store', type=int, default=3,
+                        dest='max_depth',
+                        help="pull request max search depth, default is 3")
     parser.add_argument('--version', action='version', version='%(prog)s 1.0')
     arguments = parser.parse_args()
 
@@ -311,6 +319,7 @@ if __name__ == "__main__":
     if not bzla:
         sys.exit(3)
 
+    MAX_SEARCH_DEPTH = arguments.max_depth
     bugs = get_bugsfromfix(cfgparse, bzla, gh)
     if arguments.bug_list:
         bugs += get_bugsfromlist(arguments.bug_list, bzla)
