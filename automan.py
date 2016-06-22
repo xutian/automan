@@ -191,17 +191,16 @@ def is_ready4qa(bug, gh):
 
     ghlinks = filter(is_ghlink, links)
     phlinks = filter(is_phlink, links)
+    openphs = filter(lambda x: not is_applied(x), phlinks)
     pullreqs = map(lambda link: link2pullreq(link, gh), ghlinks)
-    pullreqs = filter(None, pullreqs)
-    notappliedphs = filter(lambda x: not is_applied(x), phlinks)
-    notmergedghs = filter(lambda x: not is_merged(x), pullreqs)
-    for pullreq in notmergedghs:
+    openprs = filter(lambda x: x and x.get('state') == 'open', pullreqs)
+    for pullreq in openprs:
         ghlink = apilink2htmlink(pullreq.get_url())
         if ghlink:
             print "INFO: %s not merge" % ghlink
-    for phlink in notappliedphs:
+    for phlink in openphs:
         print "INFO: %s not applied" % phlink
-    return not (notmergedghs or notappliedphs)
+    return not (openprs or openphs)
 
 
 def move_state2onqa(bug):
