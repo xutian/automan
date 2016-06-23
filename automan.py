@@ -15,7 +15,10 @@ def apilink2htmlink(apiurl):
     """
     Translate github API link to html link
     """
-    return apiurl.replace("api.", "").replace("repos/", "")
+    url = apiurl.replace("api.", "")
+    url = url.replace("repos/", "")
+    url = url.replace("pulls", "pull")
+    return url
 
 def send_request(resource, depth=0, conditions=None):
     out = []
