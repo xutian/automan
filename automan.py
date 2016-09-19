@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import re
 import sys
@@ -327,5 +329,5 @@ if __name__ == "__main__":
     if arguments.bug_list:
         bugs += get_bugsfromlist(arguments.bug_list, bzla)
     bugs = filter(lambda b: is_ready4qa(b, gh), bugs)
-    bugs = filter(lambda b: b.get('product') == arguments.product, bugs)
+    bugs = filter(lambda b: b.product == arguments.product, bugs)
     map(move_state2onqa, bugs)
